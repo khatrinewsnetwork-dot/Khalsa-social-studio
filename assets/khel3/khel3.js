@@ -4,7 +4,7 @@ function koins(id){var K=window.KDNKoins;if(!K)return 0;try{var s=K.validate(JSO
 var RULES={jod:['पत्ते पलटो: एक पर गुरमुखी, दूसरे पर हिंदी।','सही जोड़ी (ਕ ↔ क, ਪਾਣੀ ↔ पानी) खुली रहती है।','सब जोड़ियाँ मिलाओ। स्तर 4 में 90 सेकंड हैं।','सिर्फ़ अक्खर और रोज़ के शब्द — गुरबाणी की पंक्तियाँ खेल में नहीं।'],
  rush:['संगत आती है — हर एक के ऊपर उसकी थाली का ऑर्डर है।','नीचे के बटन दबाकर थाली में व्यंजन रखो, फिर संगत को छूकर परोसो।','🙋 सेवादार साथी बीच-बीच में अपने आप एक को परोस देता है — मिलकर सेवा!','लक्ष्य तक परोसो; 3 से ज़्यादा संगत इंतज़ार में लौटे तो फिर से।'],
  khoj:['संकेत पढ़ो और सही जगह चुनो।','"🔎 और संकेत" से मदद लो — कम संकेत में ज़्यादा अंक।','आधे से ज़्यादा सही तो स्तर पार।','स्तर 4 में हर सवाल पर 20 सेकंड।']};
-function Game(root,id,C,koinId){var st=load(),lv=Math.min(st.best+1,C.LEVELS.length),paused=false,ticks=[],self=this;
+function Game(root,id,C,koinId){var st=load(),lv=Math.min(st.best+1,C.LEVELS.length),paused=false,ticks=[],self=this,started=false;
  function load(){try{return C.validate(JSON.parse(localStorage.getItem(C.KEY)))}catch(e){return C.fresh()}}
  var bar=el('div','k3-bar'),info=el('span','k3-info'),stage=el('div','k3-stage'),ov=el('div','k3-ov');ov.hidden=true;
  var pb=btn('⏸️ रोको',function(){setPause(!paused)}),rb=btn('🔁 फिर से',function(){start(lv)}),hb=btn('📜 नियम',function(){rules()});
@@ -12,9 +12,9 @@ function Game(root,id,C,koinId){var st=load(),lv=Math.min(st.best+1,C.LEVELS.len
  function setPause(p){paused=p;pb.textContent=p?'▶️ चलाओ':'⏸️ रोको';if(p){ov.textContent='';ov.appendChild(el('h2',null,'⏸️ रुका हुआ'));ov.appendChild(btn('▶️ चलाओ',function(){setPause(false)}));ov.hidden=false}else ov.hidden=true}
  function rules(){paused=true;ov.textContent='';ov.appendChild(el('h2',null,'📜 नियम'));var ul=el('ul');RULES[id].forEach(function(t){ul.appendChild(el('li',null,t))});ov.appendChild(ul);
   var lvs=el('p');C.LEVELS.forEach(function(L,i){var b=btn('स्तर '+(i+1)+(L.n?' · '+L.n:''),function(){ov.hidden=true;paused=false;start(i+1)});b.disabled=i>st.best;lvs.appendChild(b)});ov.appendChild(lvs);ov.appendChild(el('p','gu-note','🏅 '+C.BADGE+(st.badge?' ✅':' — सब स्तर पार करो')+' · 💰 +5 koins पहली जीत पर (एक बार)'));
-  /* v0.86: नियम बंद करने पर चालू स्तर बना रहे। सिर्फ़ पहली बार "खेल शुरू करें" दिखे; बाद में "नियम बंद करें" बिना restart के resume करे। */
-  var PK='kdn-khel3-played-'+id,first=true;try{first=localStorage.getItem(PK)!=='1';if(first)localStorage.setItem(PK,'1')}catch(e){}
-  var xb=btn(first?'▶️ खेल शुरू करें':'✕ नियम बंद करें',function(){ov.hidden=true;paused=false;if(first)start(Math.min(st.best+1,C.LEVELS.length))});ov.appendChild(xb);ov.hidden=false}
+  /* v0.86: नियम बंद करने का साफ़ रास्ता — पहली बार "खेल शुरू करें"; खेल चालू होने पर "नियम बंद करें" बिना restart के resume करे (instance state, storage से नहीं) */
+  var first=!started;
+  var xb=btn(first?'▶️ खेल शुरू करें':'✕ नियम बंद करें',function(){ov.hidden=true;paused=false;if(first)start(lv)});ov.appendChild(xb);ov.hidden=false}
  this.every=function(ms,f){var h=setInterval(function(){if(!paused)f()},ms);ticks.push(h);return h};
  this.paused=function(){return paused};this.stage=stage;
  this.info=function(t){info.textContent='स्तर '+lv+'/'+C.LEVELS.length+' · '+t};
@@ -22,7 +22,7 @@ function Game(root,id,C,koinId){var st=load(),lv=Math.min(st.best+1,C.LEVELS.len
   if(won){var r=C.win(load(),lv);st=r.state;try{localStorage.setItem(C.KEY,JSON.stringify(st))}catch(e){}if(r.payNow){var k=koins(koinId);ov.appendChild(el('p','gu-end','💰 +'+(k||5)+' koins'))}if(r.badgeNew)ov.appendChild(el('p','gu-end','🏅 badge मिला: '+C.BADGE));
    if(lv<C.LEVELS.length)ov.appendChild(btn('➡️ अगला स्तर',function(){ov.hidden=true;start(lv+1)}))}
   ov.appendChild(btn('🔁 फिर से',function(){ov.hidden=true;start(lv)}));ov.hidden=false};
- function start(n){ticks.forEach(clearInterval);ticks=[];lv=n;paused=false;pb.textContent='⏸️ रोको';ov.hidden=true;stage.textContent='';stage.className='k3-stage k3-'+id;self.run(n,C.LEVELS[n-1])}
+ function start(n){ticks.forEach(clearInterval);ticks=[];lv=n;paused=false;started=true;pb.textContent='⏸️ रोको';ov.hidden=true;stage.textContent='';stage.className='k3-stage k3-'+id;self.run(n,C.LEVELS[n-1])}
  this.go=function(){rules()}}
 function jod(g,n,L){var C=window.KDNJod,cards=C.deal(n),open=[],done=0,moves=0,left=L.secs;var grid=el('div','k3-grid'+(cards.length>12?' k3-g4':''));g.stage.appendChild(grid);
  function upd(){g.info(done+'/'+L.pairs+' जोड़ी · '+moves+' चाल'+(L.secs?' · ⏱️ '+left:''))}upd();
