@@ -6,8 +6,8 @@ html[lang=pa] body,html[lang=pa] button,html[lang=pa] h1,html[lang=pa] h2,html[l
 .kdn-lang button:focus-visible{outline:2px solid #ffd76a}
 /* v0.84: collapsed pill (🌐 + current language), low z-index under modals, reserved bottom space so it never covers page content */
 .kdn-lang:not(.open) button[data-l]{display:none}
-.kdn-lang button{min-height:32px;box-sizing:border-box}
-.kdn-lang-t{font-size:18px!important;min-width:36px;min-height:36px!important;text-align:center;padding:6px!important}
+.kdn-lang button{min-height:44px;box-sizing:border-box}
+.kdn-lang button.kdn-lang-t{font-size:18px!important;min-width:44px!important;min-height:44px!important;width:44px!important;height:44px;text-align:center;padding:6px!important;box-sizing:border-box}
 body.kdn-has-lang{padding-bottom:calc(150px + env(safe-area-inset-bottom))}
 body:has(dialog[open]) .kdn-lang{display:none}
 .kdn-lang-note{margin:8px auto;max-width:720px;padding:8px 12px;border-radius:10px;font:600 13px/1.4 system-ui,sans-serif;color:#2a1606;background:#f6d27a;text-align:center}
