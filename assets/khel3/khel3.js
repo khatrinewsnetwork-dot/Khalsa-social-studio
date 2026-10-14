@@ -11,7 +11,9 @@ function Game(root,id,C,koinId){var st=load(),lv=Math.min(st.best+1,C.LEVELS.len
  bar.append(info,pb,rb,hb);root.append(bar,stage,ov);
  function setPause(p){paused=p;pb.textContent=p?'▶️ चलाओ':'⏸️ रोको';if(p){ov.textContent='';ov.appendChild(el('h2',null,'⏸️ रुका हुआ'));ov.appendChild(btn('▶️ चलाओ',function(){setPause(false)}));ov.hidden=false}else ov.hidden=true}
  function rules(){paused=true;ov.textContent='';ov.appendChild(el('h2',null,'📜 नियम'));var ul=el('ul');RULES[id].forEach(function(t){ul.appendChild(el('li',null,t))});ov.appendChild(ul);
-  var lvs=el('p');C.LEVELS.forEach(function(L,i){var b=btn('स्तर '+(i+1)+(L.n?' · '+L.n:''),function(){ov.hidden=true;paused=false;start(i+1)});b.disabled=i>st.best;lvs.appendChild(b)});ov.appendChild(lvs);ov.appendChild(el('p','gu-note','🏅 '+C.BADGE+(st.badge?' ✅':' — सब स्तर पार करो')+' · 💰 +5 koins पहली जीत पर (एक बार)'));ov.hidden=false}
+  var lvs=el('p');C.LEVELS.forEach(function(L,i){var b=btn('स्तर '+(i+1)+(L.n?' · '+L.n:''),function(){ov.hidden=true;paused=false;start(i+1)});b.disabled=i>st.best;lvs.appendChild(b)});ov.appendChild(lvs);ov.appendChild(el('p','gu-note','🏅 '+C.BADGE+(st.badge?' ✅':' — सब स्तर पार करो')+' · 💰 +5 koins पहली जीत पर (एक बार)'));
+  /* v0.86: always give the player a way to close the rules overlay without starting a level */
+  var xb=btn('✕ नियम बंद करें',function(){ov.hidden=true;paused=false;start(Math.min(st.best+1,C.LEVELS.length))});ov.appendChild(xb);ov.hidden=false}
  this.every=function(ms,f){var h=setInterval(function(){if(!paused)f()},ms);ticks.push(h);return h};
  this.paused=function(){return paused};this.stage=stage;
  this.info=function(t){info.textContent='स्तर '+lv+'/'+C.LEVELS.length+' · '+t};
